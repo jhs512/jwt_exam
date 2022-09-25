@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,6 +64,7 @@ public class AppTests {
                                             "password": "1234"
                                         }
                                         """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 )
                 .andDo(print());
 
@@ -77,6 +79,45 @@ public class AppTests {
         String authentication = response.getHeader("Authentication");
 
         assertThat(authentication).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("POST /member/login 으로 올바른 username과 password 데이터를 넘기면 JWT키를 발급해준다.")
+    void t3() throws Exception {
+        // When
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/member/login")
+                                .content("""
+                                        {
+                                            "username": "user1",
+                                            "password": "1234"
+                                        }l
+                                        """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                )
+                .andDo(print());
+
+        // Then
+        resultActions
+                .andExpect(status().is2xxSuccessful());
+
+        MvcResult mvcResult = resultActions.andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+
+        String accessToken = response.getHeader("Authentication");
+
+        resultActions = mvc
+                .perform(
+                        get("/member/me")
+                                .header("Authorization", "Bearer "+ accessToken)
+                )
+                .andDo(print());
+
+        // Then
+        resultActions
+                .andExpect(status().is2xxSuccessful());
     }
 }
 // git add .; git commit -m "POST /member/login 으로 올바른 username과 password 데이터를 넘기면 JWT키를 발급해준다. 테스트케이스 추가"; git push origin master

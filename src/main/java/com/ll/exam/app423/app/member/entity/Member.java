@@ -5,9 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import com.ll.exam.app423.app.base.entity.BaseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Setter
@@ -28,5 +33,12 @@ public class Member extends BaseEntity {
 
     public Member(long id) {
         super(id);
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("MEMBER"));
+
+        return authorities;
     }
 }

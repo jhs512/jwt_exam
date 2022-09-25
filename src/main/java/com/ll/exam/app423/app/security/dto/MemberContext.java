@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 
 public class MemberContext extends User {
-    public MemberContext(Member member, List<SimpleGrantedAuthority> authorities) {
-        super(member.getUsername(), member.getPassword(), authorities);
+    public MemberContext(Member member) {
+        super(member.getUsername(), member.getPassword(), member.getAuthorities());
     }
 }

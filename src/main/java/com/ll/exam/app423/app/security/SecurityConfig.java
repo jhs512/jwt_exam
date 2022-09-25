@@ -1,9 +1,12 @@
 package com.ll.exam.app423.app.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ll.exam.app423.app.member.repository.MemberRepository;
 import com.ll.exam.app423.app.security.filter.JwtAuthenticationFilter;
+import com.ll.exam.app423.app.security.filter.JwtAuthorizationFilter;
 import com.ll.exam.app423.app.security.handler.LoginFailHandler;
 import com.ll.exam.app423.app.security.handler.LoginSuccessHandler;
+import com.ll.exam.app423.app.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,6 +23,8 @@ public class SecurityConfig {
     private final ObjectMapper om;
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailHandler loginFailHandler;
+    private final JwtProvider jwtProvider;
+    private final MemberRepository memberRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -37,7 +42,8 @@ public class SecurityConfig {
                                 loginSuccessHandler,
                                 loginFailHandler
                         ),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthorizationFilter(jwtProvider, om, memberRepository), JwtAuthenticationFilter.class);
 
         return http.build();
     }
